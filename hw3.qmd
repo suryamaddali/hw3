@@ -25,14 +25,19 @@ For this assignment, we will be using the [Wine Quality](https://archive.ics.uci
 
 We will be using the following libraries:
 
-```R
+```{R}
+
 library(readr)
 library(tidyr)
 library(dplyr)
 library(purrr)
 library(car)
 library(glmnet)
+
+
+
 ```
+
 
 <br><br><br><br>
 ---
@@ -47,14 +52,20 @@ Regression with categorical covariate and $t$-Test
 
 Read the wine quality datasets from the specified URLs and store them in data frames `df1` and `df2`.
 
-```R
+```{R}
+
+
 url1 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
 
 url2 <- "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
 
+df1 <- read_delim(url1)
 
-df1 <- ... # Insert your code here
-df2 <- ... # Insert your code here
+df2 <- read_delim(url2)
+
+
+
+
 ```
 
 ---
@@ -72,6 +83,11 @@ Perform the following tasks to prepare the data frame `df` for analysis:
 
 ```R
 df <- ... # Insert your code here
+```
+```{R}
+
+df <- rbind(df1 %>% mutate(type='white'),df2 %>% mutate(type='red')) %>%
+
 ```
 
 
