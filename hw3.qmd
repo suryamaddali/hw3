@@ -163,6 +163,14 @@ Fit a linear regression model to predict `quality` from `type` using the `lm()` 
 fit <- lm(...) # Insert your here
 t3 <- ... # Insert your here
 ```
+```{R}
+
+fit <- lm(quality ~ type, data = df)
+t3 <- coef(summary(fit))[, "t value"][2]
+t3
+
+
+```
 
 
 ---
@@ -174,7 +182,15 @@ Print a vector containing the values of `t1`, `t2`, and `t3`. What can you concl
 ```R
 c(t1, t2, t3) # Insert your code here
 ```
+```{R}
 
+values <- c(t1, t2, t3)
+
+values
+
+
+```
+I can conclude that all three methods produce roughly the same t statistic and any can be applied.
 
 
 
