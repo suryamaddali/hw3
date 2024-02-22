@@ -81,15 +81,17 @@ Perform the following tasks to prepare the data frame `df` for analysis:
 1. Remove rows (if any) with missing values.
 
 
-```R
-df <- ... # Insert your code here
-```
 ```{R}
 
-df <- rbind(df1 %>% mutate(type='white'),df2 %>% mutate(type='red')) %>%
+df <- rbind(df1 %>% mutate(type='white'),df2 %>% mutate(type='red')) %>% rename("fixed_acidity" = "fixed acidity", "volatile_acidity" = "volatile acidity", "citric_acid" = "citric acid", "residual_sugar" = "residual sugar", "free_sulfur_dioxide" = "free sulfur dioxide", "total_sulfur_dioxide" = "total sulfur dioxide") %>% subset(select = -c(fixed_acidity, free_sulfur_dioxide)) %>% mutate(type = as.factor(type)) %>% drop_na()
 
 ```
 
+```{R}
+
+dim(df)
+
+```
 
 Your output to `R dim(df)` should be
 ```
@@ -116,6 +118,17 @@ diff_mean <- ... # Insert your code here
 sp <-  ... # Insert your code here
 t1 <-  ... # Insert your code here
 ```
+```{R}
+
+df_summary <- df %>% group_by(type) %>% summarize(mean = mean(quality), sd = sd(quality), n = length(quality))
+
+diff_mean <- df_summary$mean %>% diff()
+
+sp_squared <- ((1599 - 1)*0.8075694^2+((4898-1)*0.8856386^2))/(1599+4898-2)
+
+t1 <- diff_mean/sqrt(sum(df_summary$sd^2*(df_summary$n-1))/ (sum(df_summary$n - 2))*(1/nrow(df1)+1/nrow(df2)))
+
+```
 
 
 ---
@@ -129,6 +142,15 @@ Perform a two-sample t-test to compare the quality of white and red wines using 
 ```R
 t_test <- t.test(...) # Insert your code here
 t2 <- ... # Insert your code here
+```
+```{R}
+
+t_test <- t.test(df%>% filter(type=="white") %>% select(quality),df%>% filter(type=="red") %>% select(quality), var.equal=T)
+
+t_test
+
+t2 <- 9.6856
+
 ```
 
 ---
