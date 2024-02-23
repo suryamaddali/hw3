@@ -217,7 +217,9 @@ Fit a linear regression model with all predictors against the response variable 
 ```
 ```{R}
 
-broom::tidy(lm(quality ~ ., data = df))
+full_mod <- lm(quality ~ ., data = df)
+
+broom::tidy(full_mod)
 
 
 ```
@@ -277,7 +279,14 @@ Compute the variance inflation factor (VIF) for each predictor in the full model
 ```R
 ... # Insert your code here
 ```
+```{R}
 
+vif(full_mod)
+
+
+
+```
+From this variance inflation factor analysis, I can determine that density has the highest multicolinearity meaning that it is highly dependent on quality.
 
 
 <br><br><br><br>
@@ -301,6 +310,14 @@ Run a backward stepwise regression using a `full_model` object as the starting m
 ```R
 ... # Insert your code here
 ```
+```{R}
+
+full_model <- lm(quality~ ., data = df)
+
+backward_formula <- step(full_model, scope = formula(full_model), direction = "backward")
+
+
+```
 
 ---
 
@@ -310,6 +327,14 @@ Run a forward stepwise regression using a `null_model` object as the starting mo
 
 ```R
 ... # Insert your code here
+```
+```{R}
+
+null_model <- lm(quality~1, data = df)
+
+forward_formula <- step(null_model, scope = formula(full_model), direction = "forward")
+
+
 ```
 
 
@@ -324,8 +349,28 @@ Run a forward stepwise regression using a `null_model` object as the starting mo
 
 3. Then, use the `cv.glmnet()` function to perform LASSO and Ridge regression with `X` and `y`.
 
-```R
-... # Insert your code here. 
+```{R}
+
+y <- df$quality
+
+X <- make_model_matrix <- function(formula){
+  X <- model.matrix(formula, df)[, -1]
+  cnames <- colnames(X)
+  for(i in 1:ncol(X)){
+    if(!cnames[i] == "typewhite"){
+      X[, i] <- scale(X[, i])
+    } else {
+      colnames(X)[i] <- "type"
+    }
+  }
+  return(X)
+}
+
+lasso_regr <- cv.glmnet(make_model_matrix(full_model), df$quality, alpha = 1)
+plot(lasso_regr)
+
+ridge_regr <- cv.glmnet(make_model_matrix(full_model), df$quality, alpha = 0)
+plot(ridge_regr)
 ```
 
 Create side-by-side plots of the ridge and LASSO regression results. Interpret your main findings. 
@@ -334,24 +379,63 @@ Create side-by-side plots of the ridge and LASSO regression results. Interpret y
 par(mfrow=c(1, 2))
 ... # Insert your code here. 
 ```
+```{R}
 
+par(mfrow=c(1,2))
+
+plot(lasso_regr)
+plot(ridge_regr)
+
+
+```
+From these findings, I can determine that in the lasso the non-zero coefficients have a much higher impact on the outcome variable(in the case of the graph, the points that are much higher in the graph.  In the ridge, the addition of a square minimizes how much of a pull those coefficients have and thus are much closely knit.
 ---
 
 ###### 3.4  (5 points)
 
-Print the coefficient values for LASSO regression at the `lambda.1se` value? What are the variables selected by LASSO? 
+Print the coefficient values for LASSO regression at the `lambda.1se` value? What are the variables selected by LASSO? volatile_acidity, residual_sugar, sulphates, alcohol
 
 Store the variable names with non-zero coefficients in `lasso_vars`, and create a formula object called `lasso_formula` using the `make_formula()` function provided in the Appendix. 
+
+```{R}
+lasso_regr$lambda.1se
+coef(lasso_regr)
+
+lasso_vars <- c("volatile_acidity", "residual_sugar", "sulphates", "alcohol")
+
+make_formula <- function(x){
+  as.formula(
+    paste("quality ~ ", paste(x, collapse = " + "))
+  )
+}
+
+lasso_formula <- make_formula(lasso_vars)
+
+lasso_formula
+```
 
 
 ---
 
 ###### 3.5  (5 points)
 
-Print the coefficient values for ridge regression at the `lambda.1se` value? What are the variables selected here? 
+Print the coefficient values for ridge regression at the `lambda.1se` value? What are the variables selected here? All variables are selected
 
 Store the variable names with non-zero coefficients in `ridge_vars`, and create a formula object called `ridge_formula` using the `make_formula()` function provided in the Appendix. 
 
+```{R}
+
+ridge_regr$lambda.1se
+coef(ridge_regr)
+
+ridge_vars <- c("volatile_acidity", "citric_acid", "residual_sugar", "chlorides", "total_sulfur_dioxide", "density", "pH", "sulphates", "alcohol", "type")
+
+ridge_formula <- make_formula(ridge_vars)
+
+ridge_formula
+
+
+```
 
 
 ---
@@ -360,7 +444,7 @@ Store the variable names with non-zero coefficients in `ridge_vars`, and create 
 
 What is the difference between stepwise selection, LASSO and ridge based on you analyses above?
 
-
+The differences between stepwise selection, Lasso regression, and ridge regression are a few things.  For one, stepwise selection adds predictor variables step by step and can have a direction.  Lasso regression is not performed into steps, but a penalty term added is that it maximizes the size of the coefficients to a limit.  Ridge is different in the sense that its goal is to minimize variance of the podel as a whole, and as a result penalizes the sum of squared coefficients.    
 
 
 
