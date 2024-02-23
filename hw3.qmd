@@ -33,7 +33,7 @@ library(dplyr)
 library(purrr)
 library(car)
 library(glmnet)
-
+library(corrplot)
 
 
 ```
@@ -215,7 +215,13 @@ Fit a linear regression model with all predictors against the response variable 
 ```R
 ... # Insert your code here
 ```
+```{R}
 
+broom::tidy(lm(quality ~ ., data = df))
+
+
+```
+From the model summary, I can conclude that there seems to be a correlation with most variables to quality, with the only exception being density(marked by the high standard error).  
 
 ---
 
@@ -227,11 +233,24 @@ Fit two **simple** linear regression models using `lm()`: one with only `citric_
 ```R
 model_citric <- ... # Insert your code here
 ```
+```{R}
+
+model_citric <- lm(quality ~ citric_acid, data= df)
+
+broom::tidy(model_citric)
+
+```
 
 ```R
 model_sulfur <- ... # Insert your code here
 ```
+```{R}
 
+model_sulfur <- lm(quality ~ total_sulfur_dioxide, data = df)
+
+broom::tidy(model_sulfur)
+```
+Both of these models only compare the response to a single variable as supposed to multiple.  In other words, it is not as complex as a multiple linear regression.
 
 ---
 
@@ -239,8 +258,11 @@ model_sulfur <- ... # Insert your code here
 
 Visualize the correlation matrix of all numeric columns in `df` using `corrplot()`
 
-```R
-df %>% ... # Insert your code here
+```{R}
+df_numeric <- df %>% select(!type)
+
+corrplot(cor(df_numeric))
+
 ```
 
 
